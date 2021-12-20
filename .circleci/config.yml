@@ -121,6 +121,10 @@ jobs:
             tar -xzf helm.tar.gz -C .
             mv ./linux-amd64/helm /usr/local/bin/helm
       - run:
+          name: Install kubectl components
+          command: |
+            gcloud components install kubectl
+      - run:
           name: Connect kubenertes cluster
           command: |
             gcloud container clusters get-credentials ${PROJECT_NAME} --zone ${GOOGLE_COMPUTE_ZONE} --project ${PROJECT_NAME}
