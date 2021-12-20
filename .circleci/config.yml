@@ -112,7 +112,7 @@ jobs:
       - run:
           name: Login GCP with service account
           command: |
-            gcloud auth activate-service-account ${SERVICE_ACCOUNT} --key-file=${GCP_PROJECT_KEY} --project=${GOOGLE_PROJECT_ID}
+            echo ${GCP_PROJECT_KEY} | gcloud auth activate-service-account ${SERVICE_ACCOUNT} --key-file=- --project=${GOOGLE_PROJECT_ID}
           # SERVICE_ACCOUNT format ACCOUNT@DOMAIN_NAME
       - run:
           name: Install helm
