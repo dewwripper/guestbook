@@ -132,13 +132,15 @@ jobs:
       - run:
           name: Create namespace develop and switch
           command: |
-            [[ ! -z kubectl get namespace | awk '/develop/' ]] && kubectl create namespace develop || echo "Namespace existed"
+            CHECK_NAMESPACE=kubectl get namespace | awk '/develop/'
+            [[ ! -z "${CHECK_NAMESPACE}" ]] && kubectl create namespace develop || echo "Namespace existed"
             kubectl config set-context --current --namespace=develop
 
       - run:
           name: Install redis helm chart
           command: |
-            [[ ! -z helm repo list | awk '!/bitnami/' ]] && helm repo add bitnami https://charts.bitnami.com/bitnami || echo "Already added"
+            CHECK_HELM_REPO=helm repo list | awk '!/bitnami/'
+            [[ ! -z "${CHECK_HELM_REPO}" ]] && helm repo add bitnami https://charts.bitnami.com/bitnami || echo "Already added"
             helm install redis bitnami/redis
 
       - run:
