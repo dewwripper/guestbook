@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  python: circleci/python@0.2.1
+  python: circleci/python@0.2.1  
 
 commands:
   setup_remote_docker_cmd:
@@ -15,12 +15,6 @@ commands:
           name: Docker hub login
           command:  |
             docker login -u ${DOCKER_HUB_USER} -p ${DOCKERHUB_PWD}
-  setup_docker_gcr:
-    steps:
-      - run:
-          name: Docker hub login
-          command:  |
-            echo ${GCP_PROJECT_KEY} | docker login -u _json_key --password-stdin https://gcr.io
 
 jobs:
   test:
@@ -29,9 +23,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Unit Test All
           command: |
             echo Running test cases
+          name: Unit Test All
+
 
 # On PR branch
   pr-dockerize:
@@ -41,35 +36,22 @@ jobs:
       DOCKER_BUILDKIT: 1
     steps:
       - setup_remote_docker_cmd
-      - setup_docker_gcr
-      - checkout
+      - setup_docker_hub
       - run:
           name: Prepare env
           command: |
             echo "export IMAGE_TAG=pr-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
-      - run: 
-          name: Create venv
-          command: |
-            virtualenv ${PROJECT_NAME}
-            . ${PROJECT_NAME}/bin/activate
-      - run:
-          name: Build project
-          command: |
-            docker build -t app .
-            docker tag app gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:$IMAGE_TAG
-            docker push gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:$IMAGE_TAG
+      # TODO
 
   deploy-on-pr:
     docker:
-      - image: gcr.io/google.com/cloudsdktool/cloud-sdk:350.0.0-alpine #base image
+      - image: gcr.io/google.com/cloudsdktool/cloud-sdk:350.0.0-alpine
     steps:
-      - setup_remote_docker_cmd
       - run:
           name: Prepare env
           command: |
             echo "export IMAGE_TAG=pr-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
-      
-            
+      # TODO
 
 # On the master/main branch
 # # Custom-step:
@@ -80,71 +62,24 @@ jobs:
       DOCKER_BUILDKIT: 1
     steps:
       - setup_remote_docker_cmd
-      - setup_docker_gcr
-      - checkout
+      - setup_docker_hub
       - run:
           name: Prepare env
           command: |
-            echo "export IMAGE_TAG=pr-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
-      - run: 
-          name: Create venv
-          command: |
-            virtualenv ${PROJECT_NAME}
-            . ${PROJECT_NAME}/bin/activate
-      - run:
-          name: Build project
-          command: |
-            docker build -t app .
-            docker tag app gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:$IMAGE_TAG
-            docker push gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:$IMAGE_TAG
+            echo "export IMAGE_TAG=m-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
+      # TODO
 
 # # Deploy
   deploy-on-master:
     docker:
       - image: gcr.io/google.com/cloudsdktool/cloud-sdk:350.0.0-alpine
     steps:
+      - checkout
       - run:
           name: Prepare env
           command: |
             echo "export IMAGE_TAG=m-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
-            echo "export GOOGLE_PROJECT_ID=${GOOGLE_PROJECT_ID} >> $BASH_ENV
-            echo "export PROJECT_NAME=${PROJECT_NAME} >> $BASH_ENV
-      - run:
-          name: Login GCP with service account
-          command: |
-            gcloud auth activate-service-account ${SERVICE_ACCOUNT} --key-file=${GCP_PROJECT_KEY} --project=${GOOGLE_PROJECT_ID}
-          # SERVICE_ACCOUNT format ACCOUNT@DOMAIN_NAME
-      - run:
-          name: Install helm
-          command: |
-            curl https://baltocdn.com/helm/signing.asc | apt-key add -
-            apt-get install apt-transport-https --yes
-            echo "deb https://baltocdn.com/helm/stable/debian/ all main" | tee /etc/apt/sources.list.d/helm-stable-debian.list
-            apt-get update
-            apt-get install helm
-      - run:
-          name: Connect kubenertes cluster
-          command: |
-            gcloud container clusters get-credentials ${PROJECT_NAME} --zone ${GOOGLE_COMPUTE_ZONE} --project ${PROJECT_NAME}
-
-      - run:
-          name: Create namespace develop and switch
-          command: |
-            kubectl create namespace develop
-            kubectl config set-context --current --namespace=develop
-
-      - run:
-          name: Install redis helm chart
-          command: |
-            helm repo add bitnami https://charts.bitnami.com/bitnami
-            helm install redis bitnami/redis
-
-      - run:
-          name: Apply kubenertes config
-          command: |
-            kubectl apply -f ../deploy/deployment.yml
-            
-            
+      # TODO
 
 # # Change logs
   custom-step:
@@ -231,13 +166,11 @@ workflows:
   master:
     jobs:
       - master-dockerize:
-          context: sre-pipeline
           filters:
             branches:
               only:
               - master
       - deploy-on-master:
-          context: sre-pipeline
           requires:
           - master-dockerize
           filters:
