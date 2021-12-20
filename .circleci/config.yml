@@ -132,7 +132,7 @@ jobs:
       - run:
           name: Create namespace develop and switch
           command: |
-            kubectl create namespace develop
+            [[kubectl get namespace | awk '!/develop/']] && kubectl create namespace develop || echo "Namespace existed"
             kubectl config set-context --current --namespace=develop
 
       - run:
