@@ -127,7 +127,7 @@ jobs:
       - run:
           name: Connect kubenertes cluster
           command: |
-            gcloud container clusters get-credentials ${PROJECT_NAME} --zone ${GOOGLE_COMPUTE_ZONE} --project ${PROJECT_NAME}
+            gcloud container clusters get-credentials ${PROJECT_NAME} --zone ${GOOGLE_COMPUTE_ZONE} --project ${GOOGLE_PROJECT_ID}
 
       - run:
           name: Create namespace develop and switch
