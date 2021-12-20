@@ -117,8 +117,9 @@ jobs:
       - run:
           name: Install helm
           command: |
-            apk update
-            apk add helm
+            wget https://get.helm.sh/helm-v3.7.2-linux-amd64.tar.gz -O helm.tar.gz
+            tar -xzf helm.tar.gz -C /opt/helm
+            ln -S /opt/helm/linux-amd64/helm /usr/local/bin/helm
       - run:
           name: Connect kubenertes cluster
           command: |
