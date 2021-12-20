@@ -118,8 +118,8 @@ jobs:
           name: Install helm
           command: |
             wget https://get.helm.sh/helm-v3.7.2-linux-amd64.tar.gz -O helm.tar.gz
-            tar -xzf helm.tar.gz -C /opt/helm
-            ln -S /opt/helm/linux-amd64/helm /usr/local/bin/helm
+            tar -xzf helm.tar.gz -C .
+            mv ./linux-amd64/helm /usr/local/bin/helm
       - run:
           name: Connect kubenertes cluster
           command: |
