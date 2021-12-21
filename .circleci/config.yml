@@ -139,8 +139,7 @@ jobs:
       - run:
           name: Install redis helm chart
           command: |
-            CHECK_HELM_REPO=$(helm repo list | awk '!/bitnami/')
-            [[ ! -z "${CHECK_HELM_REPO}" ]] && helm repo add bitnami https://charts.bitnami.com/bitnami || echo "Already added"
+            helm repo add bitnami https://charts.bitnami.com/bitnami
             helm install redis bitnami/redis
 
       - run:
