@@ -107,8 +107,6 @@ jobs:
           name: Prepare env
           command: |
             echo "export IMAGE_TAG=m-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
-            echo "export GOOGLE_PROJECT_ID=${GOOGLE_PROJECT_ID} >> $BASH_ENV
-            echo "export PROJECT_NAME=${PROJECT_NAME} >> $BASH_ENV
       - run:
           name: Login GCP with service account
           command: |

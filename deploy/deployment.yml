@@ -7,17 +7,17 @@ spec:
   replicas: 3
   selector:
     matchLabels:
-        app: guestbook
+        app: ${PROJECT_NAME}
         tier: frontend
   template:
     metadata:
       labels:
-        app: guestbook
+        app: ${PROJECT_NAME}
         tier: frontend
     spec:
       containers:
       - name: guestbook
-        image: https://gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:${IMAGE_TAG}
+        image: gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:${IMAGE_TAG}
         env:
         - name: GET_HOSTS_FROM
           value: "dns"
