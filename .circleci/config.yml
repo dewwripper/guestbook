@@ -144,7 +144,7 @@ jobs:
       - run:
           name: Apply kubenertes config
           command: |
-            kubectl apply -f deploy/deployment.yml
+            kubectl apply -f ${PROJECT_ROOT}/deploy/deployment.yml
             
 
 # # Change logs
