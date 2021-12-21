@@ -139,6 +139,7 @@ jobs:
       - run:
           name: Install redis helm chart
           command: |
+            helm repo remove bitnami
             helm repo add bitnami https://charts.bitnami.com/bitnami
             helm install redis bitnami/redis
 
