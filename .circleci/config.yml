@@ -146,6 +146,7 @@ jobs:
           command: |
             pwd
             ls
+            tree
             kubectl apply -f ${PROJECT_ROOT}/deploy/deployment.yml
             
 
