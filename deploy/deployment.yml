@@ -16,7 +16,7 @@ spec:
         tier: frontend
     spec:
       containers:
-      - name: php-redis
+      - name: guestbook
         image: https://gcr.io/$GOOGLE_PROJECT_ID/$PROJECT_NAME:$IMAGE_TAG
         env:
         - name: GET_HOSTS_FROM

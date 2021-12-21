@@ -102,6 +102,7 @@ jobs:
     docker:
       - image: gcr.io/google.com/cloudsdktool/cloud-sdk:350.0.0-alpine
     steps:
+      - checkout
       - run:
           name: Prepare env
           command: |
@@ -144,10 +145,7 @@ jobs:
       - run:
           name: Apply kubenertes config
           command: |
-            pwd
-            ls
-            tree
-            kubectl apply -f ${PROJECT_ROOT}/deploy/deployment.yml
+            kubectl apply -f deploy/deployment.yml
             
 
 # # Change logs
