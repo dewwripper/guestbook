@@ -130,8 +130,8 @@ jobs:
       - run:
           name: Create namespace develop and switch
           command: |
-            kubectl get namespace
-            export CHECK_NAMESPACE = $(echo $?)
+            kubectl get namespace | grep develop
+            CHECK_NAMESPACE=$(echo $?)
             [[ $CHECK_NAMESPACE = 0 ]] && echo "Namespace existed" || kubectl create namespace develop
             kubectl config set-context --current --namespace=develop
 
@@ -139,7 +139,7 @@ jobs:
           name: Install redis helm chart
           command: |
             kubectl get services | grep redis
-            export CHECK_SERVICE=$(echo $?)
+            CHECK_SERVICE=$(echo $?)
             [[ $CHECK_SERVICE = 0 ]] && echo "Redis service is running" ||  (helm repo add bitnami https://charts.bitnami.com/bitnami && helm install redis bitnami/redis)
 
       - run:
