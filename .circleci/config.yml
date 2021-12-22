@@ -68,8 +68,6 @@ jobs:
           name: Prepare env
           command: |
             echo "export IMAGE_TAG=pr-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
-            echo "export IMAGE_NAME=${PROJECT_NAME}" >> $BASH_ENV
-      
             
 
 # On the master/main branch
@@ -104,47 +102,48 @@ jobs:
     docker:
       - image: gcr.io/google.com/cloudsdktool/cloud-sdk:350.0.0-alpine
     steps:
+      - checkout
       - run:
           name: Prepare env
           command: |
             echo "export IMAGE_TAG=m-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
-            echo "export GOOGLE_PROJECT_ID=${GOOGLE_PROJECT_ID} >> $BASH_ENV
-            echo "export PROJECT_NAME=${PROJECT_NAME} >> $BASH_ENV
       - run:
           name: Login GCP with service account
           command: |
-            gcloud auth activate-service-account ${SERVICE_ACCOUNT} --key-file=${GCP_PROJECT_KEY} --project=${GOOGLE_PROJECT_ID}
+            echo ${GCP_PROJECT_KEY} | gcloud auth activate-service-account ${SERVICE_ACCOUNT} --key-file=- --project=${GOOGLE_PROJECT_ID}
           # SERVICE_ACCOUNT format ACCOUNT@DOMAIN_NAME
       - run:
           name: Install helm
           command: |
-            curl https://baltocdn.com/helm/signing.asc | apt-key add -
-            apt-get install apt-transport-https --yes
-            echo "deb https://baltocdn.com/helm/stable/debian/ all main" | tee /etc/apt/sources.list.d/helm-stable-debian.list
-            apt-get update
-            apt-get install helm
+            wget https://get.helm.sh/helm-v3.7.2-linux-amd64.tar.gz -O helm.tar.gz
+            tar -xzf helm.tar.gz -C .
+            mv ./linux-amd64/helm /usr/local/bin/helm
+      - run:
+          name: Install kubectl components
+          command: |
+            gcloud components install kubectl
       - run:
           name: Connect kubenertes cluster
           command: |
-            gcloud container clusters get-credentials ${PROJECT_NAME} --zone ${GOOGLE_COMPUTE_ZONE} --project ${PROJECT_NAME}
+            gcloud container clusters get-credentials ${PROJECT_NAME} --zone ${GOOGLE_COMPUTE_ZONE} --project ${GOOGLE_PROJECT_ID}
 
       - run:
           name: Create namespace develop and switch
           command: |
-            kubectl create namespace develop
+            CHECK_NAMESPACE=$(kubectl get namespace | awk '/develop/')
+            [[ ! -z "${CHECK_NAMESPACE}" ]] && kubectl create namespace develop || echo "Namespace existed"
             kubectl config set-context --current --namespace=develop
 
       - run:
           name: Install redis helm chart
           command: |
-            helm repo add bitnami https://charts.bitnami.com/bitnami
-            helm install redis bitnami/redis
+            CHECK_SERVICE=$(kubectl get services | awk '/redis/')
+            [[ ! -z "${CHECK_SERVICE}" ]] && helm repo add bitnami https://charts.bitnami.com/bitnami && helm install redis bitnami/redis || echo "Redis service is running"
 
       - run:
           name: Apply kubenertes config
           command: |
-            kubectl apply -f ../deploy/deployment.yml
-            
+            kubectl apply -f deploy/deployment.yml
             
 
 # # Change logs
@@ -158,9 +157,8 @@ jobs:
             echo running custom steps
 
 
-
 # Release branches
-# # Build, Ship
+## Build, Ship
   release-dockerize:
     docker:
       - image: circleci/python:3.7
@@ -175,7 +173,7 @@ jobs:
             echo "export IMAGE_TAG=${CIRCLE_BRANCH:9}-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
       # TODO
 
-# # Deploy
+## Deploy
   deploy-on-staging:
     docker:
       - image: gcr.io/google.com/cloudsdktool/cloud-sdk:350.0.0-alpine
@@ -232,13 +230,11 @@ workflows:
   master:
     jobs:
       - master-dockerize:
-          context: sre-pipeline
           filters:
             branches:
               only:
               - master
       - deploy-on-master:
-          context: sre-pipeline
           requires:
           - master-dockerize
           filters:
