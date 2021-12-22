@@ -134,7 +134,6 @@ jobs:
           command: |
             kubectl get namespace | grep develop
             CHECK_NAMESPACE=$(echo $?)
-            echo $CHECK_NAMESPACE
             if [[ $CHECK_NAMESPACE==0 ]] then
               echo "Namespace existed"
             else
