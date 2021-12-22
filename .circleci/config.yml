@@ -107,6 +107,8 @@ jobs:
           name: Prepare env
           command: |
             echo "export IMAGE_TAG=m-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
+            echo "export PROJECT_NAME=${PROJECT_NAME}" >> $BASH_ENV
+            echo "export GOOGLE_PROJECT_ID=${GOOGLE_PROJECT_ID}" >> $BASH_ENV
       - run:
           name: Login GCP with service account
           command: |
@@ -132,7 +134,7 @@ jobs:
           command: |
             kubectl get namespace | grep develop
             CHECK_NAMESPACE=$(echo $?)
-            [[ $CHECK_NAMESPACE = 0 ]] && echo "Namespace existed" || kubectl create namespace develop
+            [[ $CHECK_NAMESPACE=1 ]] && echo "Namespace existed" || kubectl create namespace develop
             kubectl config set-context --current --namespace=develop
 
       - run:
@@ -140,12 +142,13 @@ jobs:
           command: |
             kubectl get services | grep redis
             CHECK_SERVICE=$(echo $?)
-            [[ $CHECK_SERVICE = 0 ]] && echo "Redis service is running" ||  (helm repo add bitnami https://charts.bitnami.com/bitnami && helm install redis bitnami/redis)
+            [[ $CHECK_SERVICE=1 ]] && echo "Redis service is running" ||  (helm repo add bitnami https://charts.bitnami.com/bitnami && helm install redis bitnami/redis)
 
       - run:
           name: Apply kubenertes config
           command: |
-            kubectl apply -f deploy/deployment.yml
+            envsubst < "deploy/deployment.yml" > "deploy/deployment_after_add_env.yml"
+            kubectl apply -f deploy/deployment_after_add_env.yml
             
 
 # # Change logs
