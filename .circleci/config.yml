@@ -135,13 +135,12 @@ jobs:
             kubectl get namespace | grep develop
             if [ $? -ne 0 ]; then
               kubectl create namespace develop
-              kubectl config set-context --current --namespace=develop
               exit 0
             else
               echo "Namespace existed"
-              kubectl config set-context --current --namespace=develop
               exit 0
             fi
+            kubectl config set-context --current --namespace=develop
             
 
       - run:
