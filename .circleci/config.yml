@@ -145,8 +145,14 @@ jobs:
       - run:
           name: Install redis helm chart
           command: |
-            helm repo add bitnami https://charts.bitnami.com/bitnami
-            helm install redis bitnami/redis
+            kubectl get service redis-master
+            if [ $? -ne 0 ]; then
+              helm repo add bitnami https://charts.bitnami.com/bitnami
+              helm install redis bitnami/redis
+            else
+              echo "Redis service is running"
+              exit 0
+            fi
 
       - run:
           name: Apply kubenertes config
