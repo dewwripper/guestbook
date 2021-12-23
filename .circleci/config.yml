@@ -133,7 +133,7 @@ jobs:
           name: Create namespace develop and switch
           command: |
             kubectl get namespace | grep develop
-            export CHECK_NAMESPACE=$(echo $?)
+            export CHECK_NAMESPACE=0
             if [[ $CHECK_NAMESPACE==0 ]] then
               echo "Namespace existed"
             else
@@ -145,7 +145,7 @@ jobs:
           name: Install redis helm chart
           command: |
             kubectl get services | grep redis
-            export CHECK_SERVICE=$(echo $?)
+            export CHECK_SERVICE=0
             if [[ $CHECK_SERVICE==0 ]] then
               echo "Redis service is running"
             else
