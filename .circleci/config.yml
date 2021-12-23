@@ -157,6 +157,7 @@ jobs:
       - run:
           name: Apply kubenertes config
           command: |
+            apk add gettext
             envsubst < "deploy/deployment.yml" > "deploy/deployment_after_add_env.yml"
             kubectl apply -f deploy/deployment_after_add_env.yml
             
