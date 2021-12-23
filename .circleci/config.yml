@@ -132,21 +132,34 @@ jobs:
       - run:
           name: Create namespace develop and switch
           command: |
-            kubectl create namespace develop
+            kubectl get namespace develop
+            if [ $? -ne 0 ]; then
+              kubectl create namespace develop
+            else
+              echo "Namespace existed"
+              exit 0
+            fi
             kubectl config set-context --current --namespace=develop
             
 
       - run:
           name: Install redis helm chart
           command: |
-            helm repo add bitnami https://charts.bitnami.com/bitnami
-            helm install redis bitnami/redis
+            kubectl get service redis-master
+            if [ $? -ne 0 ]; then
+              helm repo add bitnami https://charts.bitnami.com/bitnami
+              helm install redis bitnami/redis
+            else
+              echo "Redis service is running"
+              exit 0
+            fi
 
       - run:
           name: Apply kubenertes config
           command: |
             apk add gettext
             envsubst < "deploy/deployment.yml" > "deploy/deployment_after_add_env.yml"
+            cat deploy/deployment_after_add_env.yml
             kubectl apply -f deploy/deployment_after_add_env.yml
             
 
