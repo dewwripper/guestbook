@@ -84,7 +84,7 @@ jobs:
       - run:
           name: Prepare env
           command: |
-            echo "export IMAGE_TAG=pr-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
+            echo "export IMAGE_TAG=m-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
       - run: 
           name: Create venv
           command: |
