@@ -146,7 +146,7 @@ jobs:
           name: Install redis helm chart
           command: |
             kubectl get service | grep redis || true
-            if [ $? -ne 0 ] then
+            if [ $? -ne 0 ]; then
               helm repo add bitnami https://charts.bitnami.com/bitnami
               helm install redis bitnami/redis
             else
