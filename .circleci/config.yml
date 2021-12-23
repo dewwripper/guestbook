@@ -132,10 +132,9 @@ jobs:
       - run:
           name: Create namespace develop and switch
           command: |
-            kubectl get namespace | grep develop
+            kubectl get namespace | grep develop || true
             if [ $? -ne 0 ]; then
               kubectl create namespace develop
-              exit 0
             else
               echo "Namespace existed"
               exit 0
@@ -146,11 +145,10 @@ jobs:
       - run:
           name: Install redis helm chart
           command: |
-            kubectl get service | grep redis
+            kubectl get service | grep redis || true
             if [ $? -ne 0 ] then
               helm repo add bitnami https://charts.bitnami.com/bitnami
               helm install redis bitnami/redis
-              exit 0
             else
               echo "Redis service is running"
               exit 0
