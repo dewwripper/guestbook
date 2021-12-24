@@ -132,7 +132,8 @@ jobs:
       - run:
           name: Create namespace develop and switch
           command: |
-            set +e kubectl get namespace | grep develop
+            set +e 
+            kubectl get namespace | grep develop
             if [ $? -ne 0 ]; then
               kubectl create namespace develop
             else
@@ -145,7 +146,8 @@ jobs:
       - run:
           name: Install redis helm chart
           command: |
-            set +e helm ls | grep redis
+            set +e 
+            helm ls | grep redis
             if [ $? -ne 0 ]; then
               helm repo add bitnami https://charts.bitnami.com/bitnami
               helm install redis bitnami/redis
