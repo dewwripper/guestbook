@@ -135,7 +135,8 @@ jobs:
           command: |
             set +e 
             kubectl get namespace | grep develop
-            if [ $? -ne 0 ]; then
+            if [ $? -ne 0 ]
+            then
               kubectl create namespace develop
             else
               echo "Namespace existed"
@@ -147,7 +148,8 @@ jobs:
           command: |
             set +e 
             helm ls | grep redis
-            if [ $? -ne 0 ]; then
+            if [ $? -ne 0 ]
+            then
               helm repo add bitnami https://charts.bitnami.com/bitnami --set password=${REDIS_PASSWORD}
               helm install redis bitnami/redis
             else
@@ -159,11 +161,18 @@ jobs:
           name: Apply kubenertes config
           command: |
             apk add gettext
-            kubectl config set-context --current --namespace=develop
             envsubst < "deploy/deployment.yml" > "deploy/deployment_after_add_env.yml"
             kubectl apply -f deploy/deployment_after_add_env.yml
-            kubectl expose deployment frontend --type=LoadBalancer --name=frontend
-            
+            kubectl config set-context --current --namespace=develop
+            set +e 
+            kubectl get services | grep frontend
+            if [ $? -ne 0 ]
+            then
+              kubectl expose deployment frontend --type=LoadBalancer --name=frontend
+            else
+              echo "Frontend service is running"
+              exit 0
+            fi
 
 # # Change logs
   custom-step:
