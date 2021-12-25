@@ -159,8 +159,8 @@ jobs:
       - run:
           name: Apply kubenertes config
           command: |
-            REDIS_URL=kubectl get service/redis-master -o jsonpath='{.spec.clusterIP}'
-            REDIS_PASSWORD=kubectl get secret --namespace develop redis -o jsonpath='{.data.redis-password}' | base64 --decode
+            REDIS_URL = kubectl get service/redis-master -o jsonpath='{.spec.clusterIP}'
+            REDIS_PASSWORD = kubectl get secret --namespace develop redis -o jsonpath='{.data.redis-password}' | base64 --decode
             echo "export REDIS_URL=$REDIS_URL" >> $BASH_ENV
             echo "export REDIS_PASSWORD=$REDIS_PASSWORD" >> $BASH_ENV
             apk add gettext
