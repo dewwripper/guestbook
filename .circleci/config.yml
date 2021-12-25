@@ -149,7 +149,7 @@ jobs:
             set +e 
             helm ls | grep redis
             if [ $? -ne 0 ]; then
-              helm repo add bitnami https://charts.bitnami.com/bitnami
+              helm repo add bitnami https://charts.bitnami.com/bitnami 
               helm install redis bitnami/redis
             else
               echo "Redis service is running"
