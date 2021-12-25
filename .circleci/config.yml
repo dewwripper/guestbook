@@ -109,7 +109,7 @@ jobs:
             echo "export IMAGE_TAG=m-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
             echo "export PROJECT_NAME=${PROJECT_NAME}" >> $BASH_ENV
             echo "export GOOGLE_PROJECT_ID=${GOOGLE_PROJECT_ID}" >> $BASH_ENV
-            echo "export REDIS_PASSWORD=${REDIS_PASSWORD}" >> $BASH_ENV
+            
       - run:
           name: Login GCP with service account
           command: |
@@ -191,12 +191,23 @@ jobs:
       DOCKER_BUILDKIT: 1
     steps:
       - setup_remote_docker_cmd
-      - setup_docker_hub
+      - setup_docker_gcr
+      - checkout
       - run:
           name: Prepare env
           command: |
             echo "export IMAGE_TAG=${CIRCLE_BRANCH:9}-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
-      # TODO
+      - run: 
+          name: Create venv
+          command: |
+            virtualenv ${PROJECT_NAME}
+            . ${PROJECT_NAME}/bin/activate
+      - run:
+          name: Build project
+          command: |
+            docker build -t app .
+            docker tag app gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:$IMAGE_TAG
+            docker push gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:$IMAGE_TAG
 
 ## Deploy
   deploy-on-staging:
@@ -207,7 +218,66 @@ jobs:
           name: Prepare env
           command: |
             echo "export IMAGE_TAG=${CIRCLE_BRANCH:9}-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
-          # TODO
+      - run:
+          name: Login GCP with service account
+          command: |
+            echo ${GCP_PROJECT_KEY} | gcloud auth activate-service-account ${SERVICE_ACCOUNT} --key-file=- --project=${GOOGLE_PROJECT_ID}
+          # SERVICE_ACCOUNT format ACCOUNT@DOMAIN_NAME
+      - run:
+          name: Install helm
+          command: |
+            wget https://get.helm.sh/helm-v3.7.2-linux-amd64.tar.gz -O helm.tar.gz
+            tar -xzf helm.tar.gz -C .
+            mv ./linux-amd64/helm /usr/local/bin/helm
+      - run:
+          name: Install kubectl components
+          command: |
+            gcloud components install kubectl
+      - run:
+          name: Connect kubenertes cluster
+          command: |
+            gcloud container clusters get-credentials ${PROJECT_NAME} --zone ${GOOGLE_COMPUTE_ZONE} --project ${GOOGLE_PROJECT_ID}
+
+      - run:
+          name: Create namespace staging and switch
+          command: |
+            set +e 
+            kubectl get namespace | grep staging
+            if [ $? -ne 0 ]
+            then
+              kubectl create namespace staging
+            else
+              echo "Namespace existed"
+            fi
+            kubectl config set-context --current --namespace=staging
+            
+      - run:
+          name: Install redis helm chart
+          command: |
+            set +e 
+            helm ls | grep redis
+            if [ $? -ne 0 ]
+            then
+              helm repo add bitnami https://charts.bitnami.com/bitnami 
+              helm install redis bitnami/redis --set auth.enabled=false
+            else
+              echo "Redis service is running"
+            fi
+            
+      - run:
+          name: Apply kubenertes config
+          command: |
+            apk add gettext
+            envsubst < "deploy/deployment.yml" > "deploy/deployment_after_add_env.yml"
+            kubectl apply -f deploy/deployment_after_add_env.yml
+            set +e 
+            kubectl get services | grep frontend
+            if [ $? -ne 0 ]
+            then
+              kubectl expose deployment frontend --type=LoadBalancer --name=frontend
+            else
+              echo "Frontend service is running"
+            fi
 
   deploy-on-production:
     docker:
@@ -217,7 +287,66 @@ jobs:
           name: Prepare env
           command: |
             echo "export IMAGE_TAG=${CIRCLE_BRANCH:9}-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
-          # TODO
+      - run:
+          name: Login GCP with service account
+          command: |
+            echo ${GCP_PROJECT_KEY} | gcloud auth activate-service-account ${SERVICE_ACCOUNT} --key-file=- --project=${GOOGLE_PROJECT_ID}
+          # SERVICE_ACCOUNT format ACCOUNT@DOMAIN_NAME
+      - run:
+          name: Install helm
+          command: |
+            wget https://get.helm.sh/helm-v3.7.2-linux-amd64.tar.gz -O helm.tar.gz
+            tar -xzf helm.tar.gz -C .
+            mv ./linux-amd64/helm /usr/local/bin/helm
+      - run:
+          name: Install kubectl components
+          command: |
+            gcloud components install kubectl
+      - run:
+          name: Connect kubenertes cluster
+          command: |
+            gcloud container clusters get-credentials ${PROJECT_NAME} --zone ${GOOGLE_COMPUTE_ZONE} --project ${GOOGLE_PROJECT_ID}
+
+      - run:
+          name: Create namespace staging and switch
+          command: |
+            set +e 
+            kubectl get namespace | grep staging
+            if [ $? -ne 0 ]
+            then
+              kubectl create namespace staging
+            else
+              echo "Namespace existed"
+            fi
+            kubectl config set-context --current --namespace=staging
+            
+      - run:
+          name: Install redis helm chart
+          command: |
+            set +e 
+            helm ls | grep redis
+            if [ $? -ne 0 ]
+            then
+              helm repo add bitnami https://charts.bitnami.com/bitnami 
+              helm install redis bitnami/redis --set auth.enabled=false
+            else
+              echo "Redis service is running"
+            fi
+            
+      - run:
+          name: Apply kubenertes config
+          command: |
+            apk add gettext
+            envsubst < "deploy/deployment.yml" > "deploy/deployment_after_add_env.yml"
+            kubectl apply -f deploy/deployment_after_add_env.yml
+            set +e 
+            kubectl get services | grep frontend
+            if [ $? -ne 0 ]
+            then
+              kubectl expose deployment frontend --type=LoadBalancer --name=frontend
+            else
+              echo "Frontend service is running"
+            fi
 
   
 workflows:
