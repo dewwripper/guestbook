@@ -308,17 +308,17 @@ jobs:
             gcloud container clusters get-credentials ${PROJECT_NAME} --zone ${GOOGLE_COMPUTE_ZONE} --project ${GOOGLE_PROJECT_ID}
 
       - run:
-          name: Create namespace staging and switch
+          name: Create namespace production and switch
           command: |
             set +e 
-            kubectl get namespace | grep staging
+            kubectl get namespace | grep production
             if [ $? -ne 0 ]
             then
-              kubectl create namespace staging
+              kubectl create namespace production
             else
               echo "Namespace existed"
             fi
-            kubectl config set-context --current --namespace=staging
+            kubectl config set-context --current --namespace=production
             
       - run:
           name: Install redis helm chart
