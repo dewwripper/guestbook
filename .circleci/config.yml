@@ -68,6 +68,9 @@ jobs:
           name: Prepare env
           command: |
             echo "export IMAGE_TAG=pr-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
+            apk --update add redis 
+            docker pull gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:$IMAGE_TAG
+            docker run -d --name frontend gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:$IMAGE_TAG
             
 
 # On the master/main branch
@@ -214,6 +217,7 @@ jobs:
     docker:
       - image: gcr.io/google.com/cloudsdktool/cloud-sdk:350.0.0-alpine
     steps:
+      - checkout
       - run:
           name: Prepare env
           command: |
@@ -283,6 +287,7 @@ jobs:
     docker:
       - image: gcr.io/google.com/cloudsdktool/cloud-sdk:350.0.0-alpine
     steps:
+      - checkout
       - run:
           name: Prepare env
           command: |
