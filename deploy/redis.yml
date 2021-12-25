@@ -1,3 +1,0 @@
-redis:
-  architecture: standalone
-  password: ""

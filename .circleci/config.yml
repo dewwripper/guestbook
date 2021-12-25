@@ -109,6 +109,7 @@ jobs:
             echo "export IMAGE_TAG=m-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
             echo "export PROJECT_NAME=${PROJECT_NAME}" >> $BASH_ENV
             echo "export GOOGLE_PROJECT_ID=${GOOGLE_PROJECT_ID}" >> $BASH_ENV
+            echo "export REDIS_PASSWORD=${REDIS_PASSWORD}" >> $BASH_ENV
       - run:
           name: Login GCP with service account
           command: |
@@ -140,8 +141,6 @@ jobs:
               echo "Namespace existed"
               exit 0
             fi
-            
-            
 
       - run:
           name: Install redis helm chart
@@ -149,7 +148,7 @@ jobs:
             set +e 
             helm ls | grep redis
             if [ $? -ne 0 ]; then
-              helm repo add bitnami https://charts.bitnami.com/bitnami -f deploy/redis.yml
+              helm repo add bitnami https://charts.bitnami.com/bitnami --set password=${REDIS_PASSWORD}
               helm install redis bitnami/redis
             else
               echo "Redis service is running"
@@ -163,6 +162,7 @@ jobs:
             kubectl config set-context --current --namespace=develop
             envsubst < "deploy/deployment.yml" > "deploy/deployment_after_add_env.yml"
             kubectl apply -f deploy/deployment_after_add_env.yml
+            kubectl expose deployment frontend --type=LoadBalancer --name=frontend
             
 
 # # Change logs
