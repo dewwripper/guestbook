@@ -366,8 +366,8 @@ jobs:
           name: Install monitoring
           command: |
             set +e
-            helm repo add bitnami https://grafana.github.io/helm-charts || true
-            helm repo add bitnami https://prometheus-community.github.io/helm-charts || true
+            helm repo add grafana https://grafana.github.io/helm-charts || true
+            helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
             helm ls | grep grafana 
             if [ $? -ne 0 ]
             then
@@ -381,7 +381,7 @@ jobs:
             if [ $? -ne 0 ]
             then
               helm repo update
-              helm install prometheus -n monitoring prometheus-community/prometheus -f prometheus.yaml
+              helm install prometheus -n monitoring prometheus-community/prometheus -f deploy/monitor/prometheus.yaml
             else
               echo "Prometheus service is running"
             fi
