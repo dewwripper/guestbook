@@ -5,8 +5,7 @@ from flask import request, redirect, render_template, url_for
 
 app = Flask(__name__)
 redis_url = os.environ.get('REDIS_URL', 'redis-master')
-redis_password = os.environ.get('REDIS_PASSWORD', '')
-app.redis = redis.StrictRedis(host=redis_url, port=6379, db=0, password=redis_password)
+app.redis = redis.StrictRedis(host=redis_url, port=6379, db=0)
 
 # Be super aggressive about saving for the development environment.
 # This says save every second if there is at least 1 change.  If you use
