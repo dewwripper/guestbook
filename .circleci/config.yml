@@ -140,7 +140,7 @@ jobs:
               echo "Namespace existed"
               exit 0
             fi
-            kubectl config set-context --current --namespace=develop
+            
             
 
       - run:
@@ -161,8 +161,8 @@ jobs:
           name: Apply kubenertes config
           command: |
             apk add gettext
+            kubectl config set-context --current --namespace=develop
             envsubst < "deploy/deployment.yml" > "deploy/deployment_after_add_env.yml"
-            kubectl delete pod --field-selector=status.phase==CrashLoopBackOff
             kubectl apply -f deploy/deployment_after_add_env.yml
             
 
