@@ -140,7 +140,6 @@ jobs:
               kubectl create namespace develop
             else
               echo "Namespace existed"
-              exit 0
             fi
             kubectl config set-context --current --namespace=develop
             
@@ -155,7 +154,6 @@ jobs:
               helm install redis bitnami/redis
             else
               echo "Redis service is running"
-              exit 0
             fi
             
       - run:
@@ -171,7 +169,6 @@ jobs:
               kubectl expose deployment frontend --type=LoadBalancer --name=frontend
             else
               echo "Frontend service is running"
-              exit 0
             fi
 
 # # Change logs
