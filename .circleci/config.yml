@@ -147,17 +147,10 @@ jobs:
           name: Install redis helm chart
           command: |
             set +e 
-            helm repo list | grep bitnami
-            if [ $? -ne 0 ]
-            then
-              helm repo add bitnami https://charts.bitnami.com/bitnami 
-            else
-              echo "Repo added"
-            fi
-            
             helm ls | grep redis
             if [ $? -ne 0 ]
             then
+              helm repo add bitnami https://charts.bitnami.com/bitnami 
               helm install redis bitnami/redis -f redis-local.yml
             else
               echo "Redis service is running"
