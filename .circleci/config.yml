@@ -267,6 +267,30 @@ jobs:
             else
               echo "Redis service is running"
             fi
+
+      - run:
+          name: Install monitoring
+          command: |
+            set +e
+            helm repo add grafana https://grafana.github.io/helm-charts || true
+            helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
+            helm ls | grep grafana 
+            if [ $? -ne 0 ]
+            then
+              helm repo update
+              helm install grafana -n monitoring grafana/grafana -f deploy/monitor/grafana.yaml
+            else
+              echo "Grafana service is running"
+            fi
+
+            helm ls | grep prometheus 
+            if [ $? -ne 0 ]
+            then
+              helm repo update
+              helm install prometheus -n monitoring prometheus-community/prometheus -f prometheus.yaml
+            else
+              echo "Prometheus service is running"
+            fi
             
       - run:
           name: Apply kubenertes config
