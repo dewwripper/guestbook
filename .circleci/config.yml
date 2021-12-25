@@ -150,8 +150,8 @@ jobs:
             helm ls | grep redis
             if [ $? -ne 0 ]
             then
-              helm repo add bitnami https://charts.bitnami.com/bitnami --set password=${REDIS_PASSWORD}
-              helm install redis bitnami/redis
+              helm repo add bitnami https://charts.bitnami.com/bitnami 
+              helm install redis bitnami/redis --set password=${REDIS_PASSWORD}
             else
               echo "Redis service is running"
             fi
