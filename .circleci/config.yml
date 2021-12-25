@@ -155,11 +155,12 @@ jobs:
               echo "Redis service is running"
               exit 0
             fi
-            echo "export REDIS_URL=kubectl get service/redis-master -o jsonpath='{.spec.clusterIP}'" >> $BASH_ENV
-            echo "export REDIS_PASSWORD=$(kubectl get secret --namespace develop redis -o jsonpath='{.data.redis-password}' | base64 --decode)" >> $BASH_ENV
+            
       - run:
           name: Apply kubenertes config
           command: |
+            echo "export REDIS_URL=kubectl get service/redis-master -o jsonpath='{.spec.clusterIP}'" >> $BASH_ENV
+            echo "export REDIS_PASSWORD=$(kubectl get secret --namespace develop redis -o jsonpath='{.data.redis-password}' | base64 --decode)" >> $BASH_ENV
             apk add gettext
             kubectl config set-context --current --namespace=develop
             envsubst < "deploy/deployment.yml" > "deploy/deployment_after_add_env.yml"
