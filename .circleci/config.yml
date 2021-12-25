@@ -161,6 +161,7 @@ jobs:
           command: |
             apk add gettext
             envsubst < "deploy/deployment.yml" > "deploy/deployment_after_add_env.yml"
+            kubectl delete pod --field-selector=status.phase==CrashLoopBackOff
             kubectl apply -f deploy/deployment_after_add_env.yml
             
 
