@@ -4,7 +4,7 @@ from flask import Flask
 from flask import request, redirect, render_template, url_for
 
 app = Flask(__name__)
-redis_url = os.environ.get('REDIS_URL', 'redis')
+redis_url = os.environ.get('REDIS_URL', 'redis-master')
 app.redis = redis.StrictRedis(host=redis_url, port=6379, db=0)
 
 # Be super aggressive about saving for the development environment.
