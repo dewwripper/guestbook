@@ -1,0 +1,16 @@
+kubeStateMetrics:
+  enabled: true
+nodeExporter:
+  enabled: true
+  hostNetwork: false
+pushgateway:
+  enabled: false
+
+alertmanager:
+  enabled: false
+
+server:
+  retention: "7d"
+  persistentVolume:
+    enabled: true
+    readOnly: true
