@@ -142,7 +142,8 @@ jobs:
               echo "Namespace existed"
               exit 0
             fi
-
+            kubectl config set-context --current --namespace=develop
+            
       - run:
           name: Install redis helm chart
           command: |
@@ -160,7 +161,6 @@ jobs:
       - run:
           name: Apply kubenertes config
           command: |
-            kubectl config set-context --current --namespace=develop
             apk add gettext
             envsubst < "deploy/deployment.yml" > "deploy/deployment_after_add_env.yml"
             kubectl apply -f deploy/deployment_after_add_env.yml
