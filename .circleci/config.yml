@@ -156,7 +156,9 @@ jobs:
               exit 0
             fi
             echo "export REDIS_URL=kubectl get service/redis-master -o jsonpath='{.spec.clusterIP}'" >> $BASH_ENV
-            
+            echo "export REDIS_PASSWORD=kubectl get service/redis-master -o jsonpath='{.spec.clusterIP}'" >> $BASH_ENV
+            echo $REDIS_URL
+            echo $REDIS_PASSWORD
       - run:
           name: Apply kubenertes config
           command: |
