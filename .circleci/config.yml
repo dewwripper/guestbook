@@ -155,7 +155,8 @@ jobs:
               echo "Redis service is running"
               exit 0
             fi
-            echo "REDIS_URL=kubectl get service/redis-master -o jsonpath='{.spec.clusterIP}'" >> $BASH_ENV
+            echo "export REDIS_URL=kubectl get service/redis-master -o jsonpath='{.spec.clusterIP}'" >> $BASH_ENV
+            
       - run:
           name: Apply kubenertes config
           command: |
