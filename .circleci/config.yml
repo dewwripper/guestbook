@@ -151,7 +151,7 @@ jobs:
             if [ $? -ne 0 ]
             then
               helm repo add bitnami https://charts.bitnami.com/bitnami 
-              helm install redis bitnami/redis -f redis-local.yml
+              helm install redis bitnami/redis -f deploy/redis-local.yml
             else
               echo "Redis service is running"
             fi
