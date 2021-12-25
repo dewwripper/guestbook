@@ -160,10 +160,10 @@ jobs:
       - run:
           name: Apply kubenertes config
           command: |
+            kubectl config set-context --current --namespace=develop
             apk add gettext
             envsubst < "deploy/deployment.yml" > "deploy/deployment_after_add_env.yml"
             kubectl apply -f deploy/deployment_after_add_env.yml
-            kubectl config set-context --current --namespace=develop
             set +e 
             kubectl get services | grep frontend
             if [ $? -ne 0 ]
