@@ -33,7 +33,7 @@ jobs:
           command: |
             python -m py_compile src/app.py
       - run: 
-          name: Lint source
+          name: Lint source code
           command: |
             echo Lint src here
           # pip install pylint
@@ -74,13 +74,12 @@ jobs:
       - image: gcr.io/google.com/cloudsdktool/cloud-sdk:350.0.0-alpine #base image
     steps:
       - setup_remote_docker_cmd
+      - setup_docker_gcr
       - run:
           name: Prepare env
           command: |
             echo "export IMAGE_TAG=pr-${CIRCLE_SHA1:0:7}" >> $BASH_ENV
-            apk --update add redis 
-            docker pull gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:$IMAGE_TAG
-            docker run -d --name frontend gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:$IMAGE_TAG
+            echo "Deploy on PR here"
             
 
 # On the master/main branch
@@ -278,30 +277,6 @@ jobs:
               echo "Redis service is running"
             fi
 
-      - run:
-          name: Install monitoring
-          command: |
-            set +e
-            helm repo add grafana https://grafana.github.io/helm-charts || true
-            helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
-            helm ls | grep grafana 
-            if [ $? -ne 0 ]
-            then
-              helm repo update
-              helm install grafana -n staging grafana/grafana -f deploy/monitor/grafana.yml
-            else
-              echo "Grafana service is running"
-            fi
-
-            helm ls | grep prometheus 
-            if [ $? -ne 0 ]
-            then
-              helm repo update
-              helm install prometheus -n staging prometheus-community/prometheus -f deploy/monitor/prometheus.yml
-            else
-              echo "Prometheus service is running"
-            fi
-            
       - run:
           name: Apply kubenertes config
           command: |
