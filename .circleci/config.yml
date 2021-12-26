@@ -28,6 +28,15 @@ jobs:
       - image: circleci/python:3.7
     steps:
       - checkout
+      - run: 
+          name: Check syntax
+          command: |
+            python -m py_compile src/app.py
+      - run: 
+          name: Lint source
+          command: |
+            pip install pylint
+            pylint src/app
       - run:
           name: Unit Test All
           command: |
